@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Author: David Barnes
+// Class: CIS 237
+// Assignment: 2
+using System;
 
 namespace cis237_assignment2
 {
@@ -12,6 +15,9 @@ namespace cis237_assignment2
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            // Increase the console buffer height
+            Console.BufferHeight = Int16.MaxValue - 1;
+
             // Starting Coordinates.
             const int X_START = 1;
             const int Y_START = 1;
@@ -42,6 +48,10 @@ namespace cis237_assignment2
             // Solve the original maze.
             mazeSolver.SolveMaze(maze1, X_START, Y_START);
 
+            // Break between solves
+            Console.WriteLine("Press enter to solve the 2nd maze");
+            Console.ReadLine();
+
             // Solve the transposed maze.
             mazeSolver.SolveMaze(maze2, X_START, Y_START);
 
@@ -68,8 +78,25 @@ namespace cis237_assignment2
         /// <returns>transposedMaze</returns>
         static char[,] transposeMaze(char[,] mazeToTranspose)
         {
-            //Write code her to create a transposed maze.
-            return new char[1, 1];
+            // Declare a new maze that will be used
+            char[,] transposedMaze = new char[
+                mazeToTranspose.GetLength(0),
+                mazeToTranspose.GetLength(1)
+            ];
+
+            // For each row in the array
+            for (int i = 0; i < mazeToTranspose.GetLength(0); i++)
+            {
+                // For each column in the array
+                for (int j = 0; j < mazeToTranspose.GetLength(1); j++)
+                {
+                    // Flip the x an y coordinates and reassign to the new maze array
+                    transposedMaze[j, i] = mazeToTranspose[i, j];
+                }
+            }
+
+            // Finally return the new maze2
+            return transposedMaze;
         }
     }
 }
