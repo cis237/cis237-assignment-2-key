@@ -22,6 +22,8 @@ namespace cis237_assignment2
         // Class level var for whether the maze has been solved yet or not.
         private bool _foundExit;
 
+        private PrintMaze printMaze;
+
         /// <summary>
         /// This is the public method that will allow someone to use this class to solve the maze.
         /// Feel free to change the return type, or add more parameters if you like, but it can be done
@@ -38,8 +40,11 @@ namespace cis237_assignment2
             // Initialize found exit to false.
             this._foundExit = false;
 
+            // Make instance of print class
+            printMaze = new PrintMaze();
+
             // Print out the start state of the maze.
-            this.printMaze();
+            printMaze.printMaze(maze);
 
             // Make the recursive call to solve the maze.
             mazeTraversal(xStart, yStart);
@@ -66,7 +71,7 @@ namespace cis237_assignment2
             this.maze[y, x] = 'X';
 
             // Print out the maze.
-            this.printMaze();
+            printMaze.printMaze(maze);
 
             // Call the class level method to check and
             // see if we are standing on the exit.
@@ -87,7 +92,7 @@ namespace cis237_assignment2
                 // Print out the maze.
                 if (!this._foundExit)
                 {
-                    this.printMaze();
+                    printMaze.printMaze(maze);
                 }
             }
 
@@ -100,7 +105,7 @@ namespace cis237_assignment2
                 mazeTraversal(x, y + 1);
                 if (!this._foundExit)
                 {
-                    this.printMaze();
+                    printMaze.printMaze(maze);
                 }
             }
 
@@ -113,7 +118,7 @@ namespace cis237_assignment2
                 mazeTraversal(x - 1, y);
                 if (!this._foundExit)
                 {
-                    this.printMaze();
+                    printMaze.printMaze(maze);
                 }
             }
 
@@ -126,7 +131,7 @@ namespace cis237_assignment2
                 mazeTraversal(x, y - 1);
                 if (!this._foundExit)
                 {
-                    this.printMaze();
+                    printMaze.printMaze(maze);
                 }
             }
             //If we reached here, it is because either there was a dead end further down from the recursive call,
@@ -156,75 +161,7 @@ namespace cis237_assignment2
                 this._foundExit = true;
 
                 //Print the final solved maze solution
-                this.printSolvedMaze();
-            }
-        }
-
-
-        /// <summary>
-        /// This method will print the solved maze solution.
-        /// It simply puts some extra information before and after printing the solution
-        /// </summary>
-        private void printSolvedMaze()
-        {
-            //Print some beginning start information
-            Console.WriteLine();
-            Console.WriteLine("-------------");
-            Console.WriteLine("Maze Solution");
-            Console.WriteLine("-------------");
-            Console.WriteLine();
-
-            //Print the maze
-            this.printMaze();
-
-            //Print some ending information
-            Console.WriteLine();
-            Console.WriteLine("-------------");
-            Console.WriteLine();
-        }
-
-        /// <summary>
-        /// This method prints out the maze.
-        /// </summary>
-        private void printMaze()
-        {
-            // For each row in the 2d array.
-            for (int i = 0; i < _mazeLength; i++)
-            {
-                // For each column in the 2d array
-                for (int j = 0; j < _mazeLength; j++)
-                {
-                    // Set Console Color based on current char.
-                    this.setConsoleColor(maze[i, j]);
-                    // Print out the current char.
-                    Console.Write(maze[i, j]);
-                }
-                // Print a blank line.
-                Console.WriteLine(); 
-            }
-            Console.ForegroundColor = ConsoleColor.Gray;
-        }
-
-        /// <summary>
-        /// This method takes in a char and sets the Console Color based on that char.
-        /// </summary>
-        private void setConsoleColor(char c)
-        {
-            if (c == 'X')
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-            }
-            else if (c == 'O')
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-            }
-            else if (c == '.')
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
+                printMaze.printSolvedMaze(maze);
             }
         }
     }
