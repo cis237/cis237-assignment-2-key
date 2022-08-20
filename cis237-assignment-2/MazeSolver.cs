@@ -13,11 +13,24 @@ namespace cis237_assignment_2
     /// </summary>
     class MazeSolver
     {
+        // Constant of max number of Orbs
+        private const int MAX_ORBS = 4;
+
+        // Array of valid move characters
+        private char[] validMoveChars = { '.', '@', '.', '.' };
+
+        // Backtrack character
+        private char backtrackChar;
+        private char searchChar;
+
         // Class level var for the maze to solve.
         private char[,] maze;
 
         // Class level var for the length of the maze in one dimension. (To save typing later).
         private int _mazeLength;
+
+        // Class level var for how many orbs the solver has found.
+        private int _orb_count;
 
         // Class level var for whether the maze has been solved yet or not.
         private bool _foundExit;
@@ -32,8 +45,18 @@ namespace cis237_assignment_2
             // Assign the passed in maze to the class level var.
             this.maze = maze;
 
+            // Set initial 
+            this.validMoveChars[2] = '.';
+            this.validMoveChars[3] = '.';
+
+            this.backtrackChar = '-';
+            this.searchChar = '+';
+
             // Assign the length to save typing later on.
             this._mazeLength = maze.GetLength(0);
+
+            // Set the orb count to zero.
+            this._orb_count = 0;
 
             // Initialize found exit to false.
             this._foundExit = false;
@@ -61,9 +84,19 @@ namespace cis237_assignment_2
         /// <param name="y">Y Position in array</param>
         private void mazeTraversal(int x, int y)
         {
+            // Check if current location is a orb and increment count if it is
+            this.checkForOrb(x, y);
+
+            // If the we are at the exit but do not have all the orbs yet, return.
+            // Not possible to solve yet and we don't want to continue placing an X in the spot.
+            if (this.checkForExit(x, y) && this._orb_count < MAX_ORBS)
+            {
+                return;
+            }
+
             // Mark the position that we are at when
             // the method is called with an X.
-            this.maze[y, x] = 'X';
+            this.maze[y, x] = searchChar;
 
             // Print out the maze.
             this.printMaze();
@@ -71,13 +104,13 @@ namespace cis237_assignment_2
             // Call the class level method to check and
             // see if we are standing on the exit.
             // If so, the foundExit flag needs to be flipped.
-            this.checkForExit(x, y);
+            this.checkForSolution(x, y);
 
             // **** Move Right ****
             // If we haven't found the exit, and
             // the postion to the right is a valid move,
             // (A period '.') we should move there with the recursive call.
-            if (!this._foundExit && maze[y, x + 1] == '.')
+            if (!this._foundExit && this.charInArray(maze[y, x + 1], this.validMoveChars))
             {
                 // Make the recursive call to this same function
                 // setting the passed in coordinates to the same
@@ -95,7 +128,7 @@ namespace cis237_assignment_2
             // Refer to the above comments for moving right.
             // Everything is the same except for the fact
             // that we are moving down instead of right.
-            if (!this._foundExit && maze[y + 1, x] == '.')
+            if (!this._foundExit && this.charInArray(maze[y + 1, x], this.validMoveChars))
             {
                 mazeTraversal(x, y + 1);
                 if (!this._foundExit)
@@ -108,7 +141,7 @@ namespace cis237_assignment_2
             // Refer to the above comments for moving right.
             // Everything is the same except for the fact
             // that we are moving left instead of right.
-            if (!this._foundExit && maze[y, x - 1] == '.')
+            if (!this._foundExit && this.charInArray(maze[y, x - 1], this.validMoveChars))
             {
                 mazeTraversal(x - 1, y);
                 if (!this._foundExit)
@@ -121,7 +154,7 @@ namespace cis237_assignment_2
             // Refer to the above comments for moving right.
             // Everything is the same except for the fact
             // that we are moving up instead of right.
-            if (!this._foundExit && maze[y - 1, x] == '.')
+            if (!this._foundExit && this.charInArray(maze[y - 1, x], this.validMoveChars))
             {
                 mazeTraversal(x, y - 1);
                 if (!this._foundExit)
@@ -136,21 +169,68 @@ namespace cis237_assignment_2
             //By having the check though, we could print the maze in the check for exit, or after it backs all the way out.
             if (!_foundExit)
             {
-                maze[y, x] = 'O';
+                maze[y, x] = backtrackChar;
+            }
+        }
+
+        /// <summary>
+        /// Check to see if current location is an Orb and if so,
+        /// increase the count of orbs.
+        /// Additionally, if the count is now at the max, update
+        /// the valid move and search / backtrack chars.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void checkForOrb(int x, int y)
+        {
+            // Check if current location is a orb and increment count if it is
+            if (this.maze[y, x] == '@')
+            {
+                this._orb_count += 1;
+
+                // Check to see if we have found the max number of Orbs
+                // and if so, update the validMoveChars and search / backtrack chars to X and O.
+                if (this._orb_count >= MAX_ORBS)
+                {
+                    // Set the current postion to a plus as it will be the last plus we switch to X.
+                    // Then print the maze to reflect that a plus was placed.
+                    this.maze[y, x] = '+';
+                    this.printMaze();
+
+                    // Add the plus and minus char to the list of valid moves.
+                    // Since we will not be able to search over what we have previously done.
+                    validMoveChars[2] = '+';
+                    validMoveChars[3] = '-';
+                    // Update the search and backtrack chars.
+                    searchChar = 'X';
+                    backtrackChar = 'O';
+                }
             }
         }
 
         /// <summary>
         /// This method checks for the exit.
         /// It just checks to see if the current passed in position is on the edge of the 2d array.
-        /// If the solution if found, it prints the maze in the solved solution.
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void checkForExit(int x, int y)
+        /// <returns>bool</returns>
+        private bool checkForExit(int x, int y)
+        {
+            return (x == 0 || x == (this._mazeLength - 1) || y == 0 || y == (this._mazeLength - 1));
+        }
+
+        /// <summary>
+        /// This method checks to see if the solver is at the exit and if the criteria for a
+        /// full solution is complete.
+        /// If so, it sets a global var to indicate so and prints the solved maze.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void checkForSolution(int x, int y)
         {
             //See if the current positon in on the outside border of the 2d array
-            if (x == 0 || x == (this._mazeLength - 1) || y == 0 || y == (this._mazeLength - 1))
+            if (this.checkForExit(x, y) && this._orb_count >= 4)
             {
                 //Set the class level found exit bool to true
                 this._foundExit = true;
@@ -188,6 +268,7 @@ namespace cis237_assignment_2
         /// </summary>
         private void printMaze()
         {
+            Console.WriteLine();
             // For each row in the 2d array.
             for (int i = 0; i < _mazeLength; i++)
             {
@@ -203,6 +284,7 @@ namespace cis237_assignment_2
                 Console.WriteLine();
             }
             Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -222,10 +304,41 @@ namespace cis237_assignment_2
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
+            else if (c == '@')
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+            }
+            else if (c == '+')
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+            }
+            else if (c == '-')
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+            }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
             }
+        }
+
+        /// <summary>
+        /// Search for char in a char array. Return true if found, false if not.
+        /// </summary>
+        /// <param name="searchChar">Char to search for.</param>
+        /// <param name="charArray">Array of chars to search through.</param>
+        /// <returns>Whether char exists in array.</returns>
+        private bool charInArray(char searchChar, char[] charArray)
+        {
+            bool returnValue = false;
+            foreach (char currentChar in charArray)
+            {
+                if (currentChar == searchChar)
+                {
+                    returnValue = true;
+                }
+            }
+            return returnValue;
         }
     }
 }
