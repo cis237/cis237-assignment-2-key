@@ -203,6 +203,8 @@ namespace cis237_assignment_2
                 Console.WriteLine();
             }
             Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
         /// <summary>
